@@ -1,0 +1,22 @@
+{
+    "name": "tommyprmbd/laravel-rbac-module",
+    "description": "A set of tools to manage permissions, roles & users",
+    "type": "project",
+    "license": "MIT",
+    "require": {
+        "php": "^8.1",
+        "illuminate/support": "^4.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "Tommyprmbd\\LaravelRbacModule\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "tommyprmbd",
+            "role": "Developer",
+            "email": "tommypriambodo@gmail.com"
+        }
+    ]
+}
