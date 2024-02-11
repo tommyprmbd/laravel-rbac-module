@@ -25,10 +25,49 @@ final class InstallCommand extends Command
      * execute command
      */
     public function handle() {
+        $this->installDatabase();
         $this->installModels();
         $this->installControllers();
         $this->installResources();
         $this->installRoutes();
+    }
+
+    /**
+     * Install migration file
+     * 
+     * @return void
+     */
+    public function installDatabase() {
+        // get users migration file
+        $userMigrationFilePath = null;
+        $scan = array_values(
+            array_filter(
+                array_diff(scandir(base_path('database/migrations')), ['.', '..']),
+                function ($value) {
+                    return strpos($value, 'users') !== false;
+                }
+            )
+        );
+        if (count($scan) > 0) {
+            $userMigrationFilePath = $scan[0];
+        }
+        
+        if ($userMigrationFilePath) {
+            // checking if there is column role_id available in users table migration file
+            
+            $this->replaceInFile(
+                <<<'EOT'
+                    $table->rememberToken();
+                EOT,
+                <<<'EOT'
+                    $table->rememberToken();
+                            $table->foreignId('role_id')->constrained();
+                EOT,
+                base_path('database/migrations/' . $userMigrationFilePath)
+            );
+        }
+        // copy rbac table migration file
+        (new Filesystem)->copyDirectory(__DIR__ . '/../../stubs/database', base_path('database'));
     }
 
     /**
@@ -78,5 +117,18 @@ Route::resources([
 ]);
 EOT . "\n";
         file_put_contents(base_path('routes/web.php'), $newRoutes, FILE_APPEND);
+    }
+
+    /**
+     * Replace a given string within a given file.
+     *
+     * @param  string  $search
+     * @param  string  $replace
+     * @param  string  $path
+     * @return void
+     */
+    protected function replaceInFile($search, $replace, $path)
+    {
+        file_put_contents($path, str_replace($search, $replace, file_get_contents($path)));
     }
 }
